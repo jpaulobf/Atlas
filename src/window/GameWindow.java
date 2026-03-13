@@ -49,6 +49,9 @@ public class GameWindow {
         // Setting this to false prevents the canvas from unexpectedly "stealing" keyboard focus.
         canvas.setFocusable(false);
 
+        // Prevents AWT from repainting the canvas, fixing flickering and FPS drops
+        canvas.setIgnoreRepaint(true);
+
         jFrame.add(canvas);
         setScreenState(screenState);
         jFrame.requestFocus(); // Ensures the window has focus to receive inputs

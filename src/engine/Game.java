@@ -117,7 +117,14 @@ public abstract class Game {
         g.drawString("FPS: " + currentFps, 5, 15);
 
         g.dispose();
-        bs.show();
+        
+        // Only show the buffer if the contents were not lost during rendering
+        if (!bs.contentsLost()) {
+            bs.show();
+        }
+        
+        // Syncs the display on some systems (Linux/Mac) to prevent tearing/stutter
+        java.awt.Toolkit.getDefaultToolkit().sync();
     }
 
     public void renderFPS(int fps) {
