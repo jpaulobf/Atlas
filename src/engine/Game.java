@@ -75,6 +75,13 @@ public abstract class Game {
     public void render(double interpolation) {
         Canvas canvas = gameWindow.getCanvas();
 
+        // Verify that the canvas is still valid before attempting to render. If the
+        // window was closed or is not displayable, we should skip rendering to avoid
+        // issues.
+        if (canvas == null || !canvas.isDisplayable()) {
+            return;
+        }
+
         BufferStrategy bs = canvas.getBufferStrategy();
         if (bs == null) {
             canvas.createBufferStrategy(3); // Triple buffering
