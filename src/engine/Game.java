@@ -34,14 +34,14 @@ public abstract class Game {
      * @param width
      * @param height
      */
-    public Game(String title, int width, int height) {
+    public Game(String title, int width, int height, int targetFps) {
         gameWindow = new GameWindow(title, width, height);
         input = new KeyboardInputs(gameWindow);
         gameWindow.addKeyListener(input);
 
         // The Engine will call the update and render methods of this Game instance
         // during the game loop.
-        engine = new Engine(this, 120);
+        engine = new Engine(this, targetFps);
     }
 
     /**

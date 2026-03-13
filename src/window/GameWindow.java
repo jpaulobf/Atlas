@@ -6,6 +6,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 /**
  * The GameWindow class is responsible for creating and managing the main application window for the game.
@@ -54,7 +55,7 @@ public class GameWindow {
 
         jFrame.add(canvas);
         setScreenState(screenState);
-        jFrame.requestFocus(); // Ensures the window has focus to receive inputs
+        jFrame.requestFocus();
     }
 
     /**
@@ -101,7 +102,8 @@ public class GameWindow {
         }
 
         jFrame.setVisible(true);
-        jFrame.requestFocus(); // Re-requests focus when changing state
+        jFrame.requestFocus();
+        //SwingUtilities.invokeLater(() -> canvas.requestFocus()); // Re-requests focus on the Canvas
     }
 
     /**
@@ -110,6 +112,7 @@ public class GameWindow {
      */
     public void addKeyListener(KeyListener listener) {
         jFrame.addKeyListener(listener);
+        //canvas.addKeyListener(listener);
     }
 
     /**
