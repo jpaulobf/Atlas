@@ -88,7 +88,22 @@ public abstract class Game {
             return;
         }
 
-        Graphics g = bs.getDrawGraphics();
+        Graphics g;
+        try {
+            g = bs.getDrawGraphics();
+        } catch (Exception e) {
+            // If the buffer strategy fails (common when toggling fullscreen),
+            // recreate the strategy for the new window state if valid, and skip this frame.
+            if (canvas.isDisplayable()) {
+                try {
+                    canvas.createBufferStrategy(3);
+                } catch (Exception ex) {
+                    // If recreation fails (window peer not ready), we ignore and try again next frame.
+                    // This prevents the crash loop during window transitions.
+                }
+            }
+            return;
+        }
 
         // Clear the screen before rendering the new frame
         g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
