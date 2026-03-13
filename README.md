@@ -32,11 +32,11 @@ A engine está organizada para separar o "Motor" do "Jogo":
 *   **`Engine`**: O coração do loop. Gerencia o tempo, acumuladores de lag e chama `update()` e `render()`.
 *   **`Game`**: Classe abstrata que serve de Template. Define o fluxo de inicialização e fornece acesso à janela e inputs.
 
-### Pacote `engine.window`
+### Pacote `window`
 *   **`GameWindow`**: Encapsula o `JFrame` e o `Canvas`. Lida com a complexidade de criar/destruir janelas nativas ao trocar de modos de tela e reinvindicar foco.
 *   **`ScreenState`**: Enumeração dos estados de tela suportados.
 
-### Pacote `engine.input`
+### Pacote `input`
 *   **`KeyboardInputs`**: Listener responsável por mapear o estado atual das teclas.
 
 ### Pacote `game`
