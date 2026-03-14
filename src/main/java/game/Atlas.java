@@ -8,8 +8,6 @@ import audio.Audio;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.awt.Rectangle;
-
 
 /**
  * The Atlas game.
@@ -18,9 +16,15 @@ public class Atlas extends Game {
 
     private List<Entity> entities = new ArrayList<>();
     private Random random = new Random();
+    private int level = 2; // Nível de dificuldade (1 a 10)
+
+    // Configurações visuais e lógicas das faixas
+    private final int TOP_SAFE_ZONE = 100;
+    private final int BOTTOM_SAFE_ZONE = 100;
+    private final int MIDDLE_SAFE_ZONE = 120;
 
     public Atlas() {
-        super("Atlas Game", 1600, 900, 60);
+        super("Atlas Game", 1600, 900, 90);
     }
 
     @Override
@@ -31,62 +35,125 @@ public class Atlas extends Game {
         Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.CYAN, 
                           Color.MAGENTA, Color.YELLOW, Color.PINK, Color.WHITE, Color.LIGHT_GRAY};
 
-        // Gera 10 Quadrados e depois 10 Círculos
-        for (int type = 0; type < 2; type++) { // 0 = Square, 1 = Circle
-            int count = 0;
-            while (count < 3) {
-                int size = 80;
-                // Tenta gerar uma posição aleatória dentro da área segura
-                float newX = random.nextFloat() * (CANVAS_WIDTH - size);
-                float newY = random.nextFloat() * (CANVAS_HEIGHT - size);
-                
-                // Verifica se sobrepõe alguma entidade já existente
-                boolean overlapping = false;
-                Rectangle newRect = new Rectangle((int)newX, (int)newY, size, size);
-                
-                for (Entity e : entities) {
-                    Rectangle existing = new Rectangle((int)e.x, (int)e.y, e.width, e.height);
-                    if (newRect.intersects(existing)) {
-                        overlapping = true;
-                        break;
+        int totalHeight = CANVAS_HEIGHT;
+        
+        // Altura disponível para as pistas (Total - Zonas Seguras)
+        int availableRoadHeight = totalHeight - TOP_SAFE_ZONE - BOTTOM_SAFE_ZONE - MIDDLE_SAFE_ZONE;
+
+        // São 8 faixas no total (4 em cima, 4 em baixo)
+        int laneHeight = availableRoadHeight / 8;
+        int carSize = 70; // Um pouco menor que a faixa
+        int carYOffset = (laneHeight - carSize) / 2; // Centralizar na faixa
+
+        // Criar as faixas
+        for (int lane = 0; lane < 8; lane++) {
+            // Calcular posição Y da faixa
+            float laneY;
+            if (lane < 4) {
+                // Faixas superiores (0 a 3)
+                laneY = TOP_SAFE_ZONE + (lane * laneHeight);
+
+            } else {
+                // Faixas inferiores (4 a 7) - Pula a middle zone
+                laneY = TOP_SAFE_ZONE + (4 * laneHeight) + MIDDLE_SAFE_ZONE + ((lane - 4) * laneHeight);
+            }
+
+            // Definir velocidade e direção da faixa
+            // Faixas pares vão para direita, ímpares para esquerda (exemplo)
+            boolean movingRight = (lane % 2 == 0);
+            
+            // Velocidade escala com o nível (De 150px/s no Lvl 1 até ~600px/s no Lvl 10)
+            float baseSpeed = 150.0f + (level * 40.0f); 
+            float speed = baseSpeed + random.nextFloat() * 100.0f; // Variação aleatória
+            if (!movingRight) speed *= -1;
+
+            // Quantidade de carros escala com o nível (Mais difícil = mais carros)
+            // Level 1-2: 1 carro. Level 10: até 4 carros.
+            int maxCars = 1 + (int)Math.ceil(level / 3.0);
+            int carsInLane = random.nextInt(maxCars) + 1;
+            
+            List<Entity> laneEntities = new ArrayList<>(); // Lista temporária para checar sobreposição na faixa atual
+
+            for (int i = 0; i < carsInLane; i++) {
+                float startX = 0;
+                boolean overlaps = true;
+                int attempts = 0;
+
+                // Tenta encontrar uma posição livre (máximo de 50 tentativas para não travar o loop)
+                while (overlaps && attempts < 50) {
+                    startX = random.nextInt(CANVAS_WIDTH);
+                    overlaps = false;
+
+                    for (Entity other : laneEntities) {
+                        // Verifica se está muito perto de outro carro (Gap de 50px)
+                        float safeGap = 50.0f;
+                        if (startX < other.x + other.width + safeGap && startX + carSize + safeGap > other.x) {
+                            overlaps = true;
+                            break;
+                        }
                     }
+                    attempts++;
                 }
-
-                if (!overlapping) {
-                    float speedBase = (random.nextInt(14) + 7) * 30.0f; 
-                    double angle = random.nextDouble() * 2 * Math.PI;
-                    float vx = (float) (Math.cos(angle) * speedBase);
-                    float vy = (float) (Math.sin(angle) * speedBase);
-                    Color color = colors[entities.size() % colors.length];
-
-                    if (type == 0) {
-                        entities.add(new Square(newX, newY, size, size, vx, vy, color));
-                    } else {
-                        entities.add(new Circle(newX, newY, size, size, vx, vy, color));
-                    }
-                    count++;
+                
+                // Só adiciona se encontrou um lugar seguro
+                if (!overlaps) {
+                    Color color = colors[random.nextInt(colors.length)];
+                    
+                    Entity car = random.nextBoolean() ? 
+                        new Square(startX, laneY + carYOffset, carSize, carSize, speed, 0, color) :
+                        new Circle(startX, laneY + carYOffset, carSize, carSize, speed, 0, color);
+                    
+                    entities.add(car);
+                    laneEntities.add(car);
                 }
             }
         }
     }
-
 
     @Override
     public void onUpdate(long deltaTime) {
         for (Entity e : entities) {
             e.update(deltaTime, CANVAS_WIDTH, CANVAS_HEIGHT);
         }
-        
-        // Verificar colisão entre todas as entidades
-        for (int i = 0; i < entities.size(); i++) {
-            for (int j = i + 1; j < entities.size(); j++) {
-                checkCollision(entities.get(i), entities.get(j));
-            }
-        }
+        // Removemos a colisão entre carros para simular tráfego fluído (Freeway style)
+        // Se quiser que eles batam, podemos reativar depois.
     }
 
     @Override
     public void onRender(Graphics g, double interpolation) {
+        // --- Desenhar o Cenário (Background) ---
+        int availableRoadHeight = CANVAS_HEIGHT - TOP_SAFE_ZONE - BOTTOM_SAFE_ZONE - MIDDLE_SAFE_ZONE;
+        int laneHeight = availableRoadHeight / 8;
+        int roadHeightBlock = laneHeight * 4;
+
+        // 1. Zonas Seguras (Grama/Verde)
+        g.setColor(new Color(34, 139, 34)); // Forest Green
+        g.fillRect(0, 0, CANVAS_WIDTH, TOP_SAFE_ZONE); // Topo
+        
+        int middleY = TOP_SAFE_ZONE + roadHeightBlock;
+        g.fillRect(0, middleY, CANVAS_WIDTH, MIDDLE_SAFE_ZONE); // Meio
+        
+        int bottomY = middleY + MIDDLE_SAFE_ZONE + roadHeightBlock;
+        g.fillRect(0, bottomY, CANVAS_WIDTH, BOTTOM_SAFE_ZONE); // Base
+
+        // 2. Estradas (Asfalto/Cinza)
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(0, TOP_SAFE_ZONE, CANVAS_WIDTH, roadHeightBlock); // Estrada Superior
+        g.fillRect(0, middleY + MIDDLE_SAFE_ZONE, CANVAS_WIDTH, roadHeightBlock); // Estrada Inferior
+
+        // 3. Linhas das faixas
+        g.setColor(Color.WHITE);
+        for (int i = 1; i < 4; i++) {
+            // Linhas Estrada Superior
+            int lineY = TOP_SAFE_ZONE + (i * laneHeight);
+            g.drawLine(0, lineY, CANVAS_WIDTH, lineY);
+
+            // Linhas Estrada Inferior
+            lineY = middleY + MIDDLE_SAFE_ZONE + (i * laneHeight);
+            g.drawLine(0, lineY, CANVAS_WIDTH, lineY);
+        }
+
+        // --- Desenhar Entidades ---
         for (Entity e : entities) {
             e.render(g, interpolation);
         }
@@ -188,29 +255,17 @@ public class Atlas extends Game {
             x += velX * deltaSeconds;
             y += velY * deltaSeconds;
 
-            // Colisão com Paredes
-            if (x < 0) {
-                x = 0;
-                velX *= -1;
-                triggerSquashX();
-                playBoing();
-            } else if (x + width > canvasWidth) {
-                x = canvasWidth - width;
-                velX *= -1;
-                triggerSquashX();
-                playBoing();
+            // Lógica de "Wrap-around" (Atravessar a tela)
+            // Se sair pela direita, volta na esquerda
+            if (velX > 0 && x > canvasWidth) {
+                x = -width;
+                prevX = x; // Reseta o histórico para evitar interpolação cruzada (flicker)
             }
-
-            if (y < 0) {
-                y = 0;
-                velY *= -1;
-                triggerSquashY();
-                playBoing();
-            } else if (y + height > canvasHeight) {
-                y = canvasHeight - height;
-                velY *= -1;
-                triggerSquashY();
-                playBoing();
+            
+            // Se sair pela esquerda, volta na direita
+            if (velX < 0 && x + width < 0) {
+                x = canvasWidth;
+                prevX = x; // Reseta o histórico para evitar interpolação cruzada (flicker)
             }
         }
 
