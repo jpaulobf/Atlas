@@ -38,6 +38,7 @@ public class Engine implements Runnable {
         running = true;
         thread = new Thread(this);
         thread.start();
+        thread.setPriority(Thread.MAX_PRIORITY); // Define a prioridade da thread para máxima
     }
 
     /**

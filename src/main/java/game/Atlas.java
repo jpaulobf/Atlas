@@ -26,7 +26,7 @@ public class Atlas extends Game {
     private final int MIDDLE_SAFE_ZONE = 120;
 
     public Atlas() {
-        super("Atlas Game", 1600, 900, 120);
+        super("Atlas Game", 1600, 900, 60);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class Atlas extends Game {
 
                     for (Entity other : laneEntities) {
                         // Verifica se está muito perto de outro carro (Gap de 50px)
-                        float safeGap = 50.0f;
+                        float safeGap = 100.0f;
                         if (startX < other.x + other.width + safeGap && startX + carSize + safeGap > other.x) {
                             overlaps = true;
                             break;
