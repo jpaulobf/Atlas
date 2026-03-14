@@ -4,6 +4,8 @@ import engine.Game;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
+import audio.Audio;
+
 
 /**
  * The Atlas game.
@@ -14,9 +16,10 @@ public class Atlas extends Game {
     private float y = 100;
     private float prevX = 100;
     private float prevY = 100;
-    private float speed = 400.0f; // Pixels por segundo
+    private float speed = 400.0f; // Pixels per second
     private int playerWidth = 50;
     private int playerHeight = 100;
+    private Audio boing;
 
     public Atlas() {
         super("Atlas Game", 1600, 900, 480);
@@ -24,15 +27,17 @@ public class Atlas extends Game {
 
     @Override
     public void init() {
+        // Resource loading should happen in init()
+        boing = new Audio("/audio/boing.ogg");
     }
 
     @Override
     public void onUpdate(long deltaTime) {
-        // Armazena a posição antes de atualizar (para interpolação)
+        // Store position before update (for interpolation)
         prevX = x;
         prevY = y;
 
-        // Converte deltaTime (nanosegundos) para segundos para o cálculo de física
+        // Convert deltaTime (nanoseconds) to seconds for physics calculation
         double deltaSeconds = deltaTime / 1_000_000_000.0;
         float moveAmount = (float) (speed * deltaSeconds);
 
@@ -41,19 +46,30 @@ public class Atlas extends Game {
         if (input.isKeyDown(KeyEvent.VK_A)) x -= moveAmount;
         if (input.isKeyDown(KeyEvent.VK_D)) x += moveAmount;
 
-        // Limites da tela (Colisão com bordas)
+        // Screen limits (Collision with borders)
         int screenWidth = gameWindow.getCanvas().getWidth();
         int screenHeight = gameWindow.getCanvas().getHeight();
 
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x + playerWidth > screenWidth) x = screenWidth - playerWidth;
-        if (y + playerHeight > screenHeight) y = screenHeight - playerHeight;
+        if (x < 0) {
+            x = 0;
+            boing.play();
+        } else if (x + playerWidth > screenWidth) {
+            x = screenWidth - playerWidth;
+            boing.play();
+        }
+
+        if (y < 0) {
+            y = 0;
+            boing.play();
+        } else if (y + playerHeight > screenHeight) {
+            y = screenHeight - playerHeight;
+            boing.play();
+        }
     }
 
     @Override
     public void onRender(Graphics g, double interpolation) {
-        // Calcula a posição visual interpolando entre a posição anterior e a atual
+        // Calculate visual position interpolating between previous and current position
         int renderX = (int) (prevX + (x - prevX) * interpolation);
         int renderY = (int) (prevY + (y - prevY) * interpolation);
 

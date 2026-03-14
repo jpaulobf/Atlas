@@ -17,7 +17,7 @@ public class GameWindow {
     //--- Private fields for the JFrame and Canvas components
     private JFrame jFrame;
     private Canvas canvas;
-    private ScreenState screenState = ScreenState.FULLSCREEN; // Default screen state
+    private ScreenState screenState = ScreenState.WINDOWED; // Default screen state
     private ScreenState preferredFullscreenState = ScreenState.FULLSCREEN; // Default fullscreen target
     private String title;
     private int width;
