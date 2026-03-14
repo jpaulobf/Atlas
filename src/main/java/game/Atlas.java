@@ -16,10 +16,15 @@ public class Atlas extends Game {
     private float y = 100;
     private float prevX = 100;
     private float prevY = 100;
-    private float speed = 800.0f; // Pixels per second
+    private float speed = 600.0f; // Pixels per second
     private float velX;
     private float velY;
-    private int playerWidth = 50;
+    private float scaleX = 1.0f;
+    private float scaleY = 1.0f;
+    private float squashCycleX = 0.0f;
+    private float squashCycleY = 0.0f;
+    private float squashSpeed = 15.0f; // Controla a velocidade da animação (quanto maior, mais rápido o 'boing')
+    private int playerWidth = 100;
     private int playerHeight = 100;
     private Audio boingX;
     private Audio boingY;
@@ -61,6 +66,28 @@ public class Atlas extends Game {
         // Convert deltaTime (nanoseconds) to seconds for physics calculation
         double deltaSeconds = deltaTime / 1_000_000_000.0;
         
+        // Animação de Squash no eixo X (Senoide de 0 a PI)
+        if (squashCycleX > 0) {
+            squashCycleX += squashSpeed * deltaSeconds;
+            if (squashCycleX >= Math.PI) {
+                squashCycleX = 0;
+                scaleX = 1.0f;
+            } else {
+                scaleX = 1.0f - 0.3f * (float) Math.sin(squashCycleX);
+            }
+        }
+        
+        // Animação de Squash no eixo Y
+        if (squashCycleY > 0) {
+            squashCycleY += squashSpeed * deltaSeconds;
+            if (squashCycleY >= Math.PI) {
+                squashCycleY = 0;
+                scaleY = 1.0f;
+            } else {
+                scaleY = 1.0f - 0.3f * (float) Math.sin(squashCycleY);
+            }
+        }
+
         // Apply velocity to position
         x += velX * deltaSeconds;
         y += velY * deltaSeconds;
@@ -68,20 +95,24 @@ public class Atlas extends Game {
         if (x < 0) {
             x = 0;
             velX *= -1; // Bounce horizontally
+            if (squashCycleX == 0) squashCycleX = 0.01f; // Inicia animação suave
             boingX.play();
         } else if (x + playerWidth > CANVAS_WIDTH) {
             x = CANVAS_WIDTH - playerWidth;
             velX *= -1; // Bounce horizontally
+            if (squashCycleX == 0) squashCycleX = 0.01f; // Inicia animação suave
             boingX.play();
         }
 
         if (y < 0) {
             y = 0;
             velY *= -1; // Bounce vertically
+            if (squashCycleY == 0) squashCycleY = 0.01f; // Inicia animação suave
             boingY.play();
         } else if (y + playerHeight > CANVAS_HEIGHT) {
             y = CANVAS_HEIGHT - playerHeight;
             velY *= -1; // Bounce vertically
+            if (squashCycleY == 0) squashCycleY = 0.01f; // Inicia animação suave
             boingY.play();
         }
     }
@@ -89,11 +120,19 @@ public class Atlas extends Game {
     @Override
     public void onRender(Graphics g, double interpolation) {
         // Calculate visual position interpolating between previous and current position
-        int renderX = (int) (prevX + (x - prevX) * interpolation);
-        int renderY = (int) (prevY + (y - prevY) * interpolation);
+        float interpX = (float) (prevX + (x - prevX) * interpolation);
+        float interpY = (float) (prevY + (y - prevY) * interpolation);
+
+        // Calcula o tamanho deformado
+        float drawnWidth = playerWidth * scaleX;
+        float drawnHeight = playerHeight * scaleY;
+
+        // Centraliza o desenho para que a deformação ocorra para o meio, e não para o topo-esquerda
+        float drawX = interpX + (playerWidth - drawnWidth) / 2.0f;
+        float drawY = interpY + (playerHeight - drawnHeight) / 2.0f;
 
         g.setColor(Color.RED);
-        g.fillRect(renderX, renderY, playerWidth, playerHeight);
+        g.fillRect((int)drawX, (int)drawY, (int)drawnWidth, (int)drawnHeight);
     }
 
     public static void main(String[] args) {
