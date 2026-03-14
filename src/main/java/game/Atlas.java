@@ -4,6 +4,7 @@ import engine.Game;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import audio.Audio;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class Atlas extends Game {
     private List<Entity> entities = new ArrayList<>();
     private Random random = new Random();
     private int level = 2; // Nível de dificuldade (1 a 10)
+    private BufferedImage background; // O Cache do cenário
 
     // Configurações visuais e lógicas das faixas
     private final int TOP_SAFE_ZONE = 100;
@@ -24,12 +26,13 @@ public class Atlas extends Game {
     private final int MIDDLE_SAFE_ZONE = 120;
 
     public Atlas() {
-        super("Atlas Game", 1600, 900, 90);
+        super("Atlas Game", 1600, 900, 120);
     }
 
     @Override
     public void init() {
         entities.clear();
+        createBackground(); // Gera a imagem do cenário uma única vez
         
         // Cores variadas
         Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.CYAN, 
@@ -121,7 +124,23 @@ public class Atlas extends Game {
 
     @Override
     public void onRender(Graphics g, double interpolation) {
-        // --- Desenhar o Cenário (Background) ---
+        if (background != null) {
+            g.drawImage(background, 0, 0, null);
+        }
+
+        // --- Desenhar Entidades ---
+        for (Entity e : entities) {
+            e.render(g, interpolation);
+        }
+    }
+
+    /**
+     * Renderiza o cenário estático em um BufferedImage para otimizar o onRender.
+     */
+    private void createBackground() {
+        background = new BufferedImage(CANVAS_WIDTH, CANVAS_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        Graphics g = background.getGraphics();
+
         int availableRoadHeight = CANVAS_HEIGHT - TOP_SAFE_ZONE - BOTTOM_SAFE_ZONE - MIDDLE_SAFE_ZONE;
         int laneHeight = availableRoadHeight / 8;
         int roadHeightBlock = laneHeight * 4;
@@ -144,74 +163,13 @@ public class Atlas extends Game {
         // 3. Linhas das faixas
         g.setColor(Color.WHITE);
         for (int i = 1; i < 4; i++) {
-            // Linhas Estrada Superior
             int lineY = TOP_SAFE_ZONE + (i * laneHeight);
-            g.drawLine(0, lineY, CANVAS_WIDTH, lineY);
+            g.fillRect(0, lineY, CANVAS_WIDTH, 3);
 
-            // Linhas Estrada Inferior
             lineY = middleY + MIDDLE_SAFE_ZONE + (i * laneHeight);
-            g.drawLine(0, lineY, CANVAS_WIDTH, lineY);
+            g.fillRect(0, lineY, CANVAS_WIDTH, 3);
         }
-
-        // --- Desenhar Entidades ---
-        for (Entity e : entities) {
-            e.render(g, interpolation);
-        }
-    }
-
-    /**
-     * Verifica e resolve colisão entre duas entidades
-     */
-    private void checkCollision(Entity s1, Entity s2) {
-        // Colisão AABB simples
-        if (s1.x < s2.x + s2.width && s1.x + s1.width > s2.x &&
-            s1.y < s2.y + s2.height && s1.y + s1.height > s2.y) {
-            
-            // Toca o som (apenas em um para não saturar)
-            s1.playBoing();
-
-            // Determinar a direção da colisão calculando a sobreposição
-            float overlapX = Math.min(s1.x + s1.width, s2.x + s2.width) - Math.max(s1.x, s2.x);
-            float overlapY = Math.min(s1.y + s1.height, s2.y + s2.height) - Math.max(s1.y, s2.y);
-
-            // Se overlapX < overlapY, a colisão foi lateral (horizontal)
-            if (overlapX < overlapY) {
-                // Resolve overlap empurrando para fora (metade para cada)
-                if (s1.x < s2.x) {
-                    s1.x -= overlapX / 2;
-                    s2.x += overlapX / 2;
-                } else {
-                    s1.x += overlapX / 2;
-                    s2.x -= overlapX / 2;
-                }
-                
-                // Inverte velocidades X
-                s1.velX *= -1;
-                s2.velX *= -1;
-                
-                // Aciona deformação X
-                s1.triggerSquashX();
-                s2.triggerSquashX();
-            } else {
-                // Colisão Vertical
-                // Resolve overlap
-                if (s1.y < s2.y) {
-                    s1.y -= overlapY / 2;
-                    s2.y += overlapY / 2;
-                } else {
-                    s1.y += overlapY / 2;
-                    s2.y -= overlapY / 2;
-                }
-                
-                // Inverte velocidades Y
-                s1.velY *= -1;
-                s2.velY *= -1;
-                
-                // Aciona deformação Y
-                s1.triggerSquashY();
-                s2.triggerSquashY();
-            }
-        }
+        g.dispose(); // Libera o recurso gráfico temporário da imagem
     }
 
     // --- Abstract Base Entity ---
@@ -248,9 +206,6 @@ public class Atlas extends Game {
             prevY = y;
             double deltaSeconds = deltaTime / 1_000_000_000.0;
 
-            // Atualiza animações de squash
-            updateSquash(deltaSeconds);
-
             // Movimento
             x += velX * deltaSeconds;
             y += velY * deltaSeconds;
@@ -270,35 +225,6 @@ public class Atlas extends Game {
         }
 
         public abstract void render(Graphics g, double interpolation);
-
-        private void updateSquash(double deltaSeconds) {
-            if (squashCycleX > 0) {
-                squashCycleX += squashSpeed * deltaSeconds;
-                if (squashCycleX >= Math.PI) {
-                    squashCycleX = 0;
-                    scaleX = 1.0f;
-                } else {
-                    scaleX = 1.0f - 0.3f * (float) Math.sin(squashCycleX);
-                }
-            }
-            if (squashCycleY > 0) {
-                squashCycleY += squashSpeed * deltaSeconds;
-                if (squashCycleY >= Math.PI) {
-                    squashCycleY = 0;
-                    scaleY = 1.0f;
-                } else {
-                    scaleY = 1.0f - 0.3f * (float) Math.sin(squashCycleY);
-                }
-            }
-        }
-
-        public void triggerSquashX() {
-            if (squashCycleX == 0) squashCycleX = 0.01f;
-        }
-
-        public void triggerSquashY() {
-            if (squashCycleY == 0) squashCycleY = 0.01f;
-        }
 
         public void playBoing() {
             audio.play();

@@ -28,8 +28,8 @@ public abstract class Game {
     protected Engine engine;
     protected KeyboardInputs input;
     private int currentFps = 0;
-    protected final int CANVAS_WIDTH = 1920;
-    protected final int CANVAS_HEIGHT = 1080;
+    protected final int CANVAS_WIDTH = 1600;
+    protected final int CANVAS_HEIGHT = 900;
     
     // Cached scaling values
     private double scale = 1.0;
