@@ -41,13 +41,13 @@ public class Audio {
             // Defines the decoded format (PCM) required for the Clip to play
             // Transforms from OGG/Vorbis to raw data (PCM 16-bit)
             AudioFormat decodeFormat = new AudioFormat(
-                AudioFormat.Encoding.PCM_SIGNED,
-                baseFormat.getSampleRate(),
-                16, // 16 bits
-                baseFormat.getChannels(),
-                baseFormat.getChannels() * 2, // Frame size: channels * 2 bytes
-                baseFormat.getSampleRate(),
-                false // Little Endian
+                    AudioFormat.Encoding.PCM_SIGNED,
+                    baseFormat.getSampleRate(),
+                    16, // 16 bits
+                    baseFormat.getChannels(),
+                    baseFormat.getChannels() * 2, // Frame size: channels * 2 bytes
+                    baseFormat.getSampleRate(),
+                    false // Little Endian
             );
 
             // Creates the decoded stream
@@ -72,8 +72,9 @@ public class Audio {
      * Starts playback. If paused, resumes. If finished, restarts.
      */
     public void play() {
-        if (clip == null) return;
-        
+        if (clip == null)
+            return;
+
         // If reached the end, rewind to start before playing
         if (clip.getFramePosition() >= clip.getFrameLength()) {
             clip.setFramePosition(0);
@@ -94,7 +95,8 @@ public class Audio {
      * Stops playback, rewinds to the beginning, and plays again.
      */
     public void restart() {
-        if (clip == null) return;
+        if (clip == null)
+            return;
         stop();
         clip.setFramePosition(0);
         clip.start();
@@ -104,25 +106,30 @@ public class Audio {
      * Plays in an infinite loop (good for background music).
      */
     public void loop() {
-        if (clip == null) return;
+        if (clip == null)
+            return;
         clip.setFramePosition(0);
         clip.loop(Clip.LOOP_CONTINUOUSLY);
     }
 
     /**
      * Sets the audio volume.
+     * 
      * @param volume Value between 0.0 (mute) and 1.0 (max volume).
      */
     public void setVolume(float volume) {
-        if (volumeControl == null) return;
+        if (volumeControl == null)
+            return;
 
         // Clamps values between 0 and 1
-        if (volume < 0f) volume = 0f;
-        if (volume > 1f) volume = 1f;
+        if (volume < 0f)
+            volume = 0f;
+        if (volume > 1f)
+            volume = 1f;
 
         float min = volumeControl.getMinimum();
         float max = volumeControl.getMaximum();
-        
+
         // The gain control uses Decibels (logarithmic scale)
         // Convert linear (0-1) to dB
         float dB;
@@ -133,12 +140,14 @@ public class Audio {
         }
 
         // Ensures dB value is within hardware limits
-        if (dB < min) dB = min;
-        if (dB > max) dB = max;
+        if (dB < min)
+            dB = min;
+        if (dB > max)
+            dB = max;
 
         volumeControl.setValue(dB);
     }
-    
+
     /**
      * Closes the clip and releases system resources.
      */

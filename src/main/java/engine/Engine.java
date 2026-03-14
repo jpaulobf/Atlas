@@ -1,15 +1,19 @@
 package engine;
 
 /**
- * Manages the main game loop, ensuring the game logic runs at a fixed update rate (UPS)
+ * Manages the main game loop, ensuring the game logic runs at a fixed update
+ * rate (UPS)
  * while allowing for a variable or capped rendering frame rate (FPS).
- * This class implements a fixed timestep pattern with an accumulator to provide deterministic updates,
- * and an optional, precise sleep logic to cap the FPS, compensating for `Thread.sleep` inaccuracies.
- * The `run()` method is the heart of the engine, orchestrating updates, rendering with interpolation,
+ * This class implements a fixed timestep pattern with an accumulator to provide
+ * deterministic updates,
+ * and an optional, precise sleep logic to cap the FPS, compensating for
+ * `Thread.sleep` inaccuracies.
+ * The `run()` method is the heart of the engine, orchestrating updates,
+ * rendering with interpolation,
  * and performance tracking.
  */
 public class Engine implements Runnable {
-    
+
     // Game loop control variables
     private boolean running = false;
     private Thread thread;
@@ -21,8 +25,11 @@ public class Engine implements Runnable {
 
     /**
      * Engine constructor, receives a game instance to manage the game loop.
-     * @param game The game instance that will be updated and rendered by the game loop.
-     * @param targetFps The target frames per second to cap rendering at. Use 0 for unlimited FPS.
+     * 
+     * @param game      The game instance that will be updated and rendered by the
+     *                  game loop.
+     * @param targetFps The target frames per second to cap rendering at. Use 0 for
+     *                  unlimited FPS.
      */
     public Engine(Game game, int targetFps) {
         this.game = game;
@@ -30,7 +37,8 @@ public class Engine implements Runnable {
     }
 
     /**
-     * Starts the game loop in a new thread. Does nothing if the loop is already running.
+     * Starts the game loop in a new thread. Does nothing if the loop is already
+     * running.
      */
     public synchronized void start() {
         if (running)
@@ -57,9 +65,12 @@ public class Engine implements Runnable {
 
     /**
      * The main game loop method.
-     * It uses a fixed timestep with an accumulator to call the game's update method a consistent number of times per second.
-     * It then calls the render method, providing an interpolation value for smooth graphics.
-     * If a target FPS is set, it uses a precise sleep logic to control the frame rate.
+     * It uses a fixed timestep with an accumulator to call the game's update method
+     * a consistent number of times per second.
+     * It then calls the render method, providing an interpolation value for smooth
+     * graphics.
+     * If a target FPS is set, it uses a precise sleep logic to control the frame
+     * rate.
      * FPS and UPS are counted and displayed in the console each second.
      */
     @Override
@@ -69,13 +80,13 @@ public class Engine implements Runnable {
 
         // Nanoseconds per update based on UPS (1s / 60)
         final double nsPerUpdate = 1000000000.0 / UPS;
-        
+
         // Nanoseconds per frame for FPS control (if applicable)
         final double nsPerFrame = (targetFps > 0) ? 1000000000.0 / targetFps : 0;
-        
+
         long overSleep = 0; // Variable to compensate for Thread.sleep inaccuracy
         long lastTime = System.nanoTime();
-        
+
         // Accumulator for the Fixed Time Step
         double delta = 0;
 
@@ -83,7 +94,7 @@ public class Engine implements Runnable {
             long now = System.nanoTime();
             long elapsed = now - lastTime;
             lastTime = now;
-            
+
             // Add the elapsed time to the accumulator (in update slices)
             delta += elapsed / nsPerUpdate;
 
@@ -96,7 +107,7 @@ public class Engine implements Runnable {
                 updates++;
                 updateCount++;
             }
-            
+
             // The remaining 'delta' value is the interpolation factor for smooth rendering
             game.render(delta);
 
