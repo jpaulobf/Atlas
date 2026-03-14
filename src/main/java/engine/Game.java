@@ -30,11 +30,12 @@ public abstract class Game {
     private int currentFps = 0;
     protected final int CANVAS_WIDTH = 1600;
     protected final int CANVAS_HEIGHT = 900;
-    
+
     // Cached scaling values
     private double scale = 1.0;
     private double offsetX = 0;
     private double offsetY = 0;
+    private boolean paused = false;
 
     /**
      * Constructs a new Game instance with the specified title, width, and height
@@ -45,7 +46,7 @@ public abstract class Game {
      * @param height
      */
     public Game(String title, int width, int height, int targetFps) {
-        gameWindow = new GameWindow(title, width, height);
+        gameWindow = new GameWindow(title, width, height, this);
         input = new KeyboardInputs(gameWindow);
         gameWindow.addKeyListener(input);
 
@@ -78,11 +79,12 @@ public abstract class Game {
      */
     private void recalculateScale() {
         Canvas canvas = gameWindow.getCanvas();
-        if (canvas == null) return;
+        if (canvas == null)
+            return;
 
         double scaleX = (double) canvas.getWidth() / CANVAS_WIDTH;
         double scaleY = (double) canvas.getHeight() / CANVAS_HEIGHT;
-        
+
         this.scale = Math.min(scaleX, scaleY);
 
         double drawWidth = CANVAS_WIDTH * this.scale;
@@ -102,7 +104,18 @@ public abstract class Game {
         if (input.isKeyDown(KeyEvent.VK_ESCAPE)) {
             System.exit(0);
         }
-        onUpdate(deltaTime);
+
+        if (!paused) {
+            onUpdate(deltaTime);
+        }
+    }
+
+    public void togglePause() {
+        this.paused = !this.paused;
+    }
+
+    public boolean isPaused() {
+        return paused;
     }
 
     /**
@@ -137,7 +150,8 @@ public abstract class Game {
                 try {
                     canvas.createBufferStrategy(3);
                 } catch (Exception ex) {
-                    // If recreation fails (window peer not ready), we ignore and try again next frame.
+                    // If recreation fails (window peer not ready), we ignore and try again next
+                    // frame.
                     // This prevents the crash loop during window transitions.
                 }
             }
@@ -152,7 +166,10 @@ public abstract class Game {
         g2d.translate(offsetX, offsetY);
         g2d.scale(scale, scale);
 
-        onRender(g2d, interpolation);
+        onRender(g2d, paused ? 0 : interpolation);
+        if (paused) {
+            drawPauseScreen(g2d);
+        }
         g2d.dispose(); // Release the copy
 
         // Draw FPS counter in the top-left corner for debugging
@@ -160,14 +177,28 @@ public abstract class Game {
         g.drawString("FPS: " + currentFps, 5, 15);
 
         g.dispose();
-        
+
         // Only show the buffer if the contents were not lost during rendering
         if (!bs.contentsLost()) {
             bs.show();
         }
-        
+
         // Syncs the display on some systems (Linux/Mac) to prevent tearing/stutter
         java.awt.Toolkit.getDefaultToolkit().sync();
+    }
+
+    private void drawPauseScreen(Graphics g) {
+        // Calculate the dimensions and position for the pause rectangle
+        int rectWidth = 320;
+        int rectHeight = 150;
+        int rectX = (CANVAS_WIDTH - rectWidth) / 2;
+        int rectY = (CANVAS_HEIGHT - rectHeight) / 2;
+
+        g.setColor(new Color(0, 0, 0, 150)); // Semi-transparent black
+        g.fillRect(rectX, rectY, rectWidth, rectHeight);
+        g.setColor(Color.WHITE);
+        g.setFont(g.getFont().deriveFont(100f));
+        g.drawString("Pause", rectX + 15, rectY + 100);
     }
 
     public void renderFPS(int fps) {
@@ -176,6 +207,8 @@ public abstract class Game {
 
     // --- Abstract methods
     public abstract void init();
+
     public abstract void onUpdate(long deltaTime);
+
     public abstract void onRender(Graphics g, double interpolation);
 }

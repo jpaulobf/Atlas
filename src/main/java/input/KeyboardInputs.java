@@ -32,6 +32,10 @@ public class KeyboardInputs implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && e.isAltDown()) {
             gameWindow.toggleFullScreen();
         }
+
+        if (e.getKeyCode() == KeyEvent.VK_P) {
+            gameWindow.getGame().togglePause();
+        }
     }
 
     @Override
@@ -44,6 +48,7 @@ public class KeyboardInputs implements KeyListener {
 
     /**
      * Checks if a specific key is currently held down.
+     * 
      * @param keyCode The KeyEvent code.
      */
     public boolean isKeyDown(int keyCode) {
