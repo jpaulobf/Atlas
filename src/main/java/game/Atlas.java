@@ -26,6 +26,8 @@ public class Atlas extends Game {
     private final int BOTTOM_SAFE_ZONE = 100;
     private final int MIDDLE_SAFE_ZONE = 120;
     private List<Projectile> projectiles = new ArrayList<>();
+    private Audio freeway;
+    private Audio rain;
 
     public Atlas() {
         super("Atlas Game", 1600, 900, 60);
@@ -49,6 +51,12 @@ public class Atlas extends Game {
         int laneHeight = availableRoadHeight / 8;
         int carSize = 60; // Slightly smaller than the lane
         int carYOffset = (laneHeight - carSize) / 2; // Center in the lane
+
+        this.freeway = new Audio("/audio/freeway.ogg");
+        this.freeway.loop();
+
+        this.rain = new Audio("/audio/rain.ogg");
+        this.rain.loop();
 
         // Create the lanes
         for (int lane = 0; lane < 8; lane++) {
