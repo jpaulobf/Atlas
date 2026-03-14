@@ -3,8 +3,8 @@ package game;
 import engine.Game;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
 import audio.Audio;
+import java.util.Random;
 
 
 /**
@@ -16,19 +16,40 @@ public class Atlas extends Game {
     private float y = 100;
     private float prevX = 100;
     private float prevY = 100;
-    private float speed = 400.0f; // Pixels per second
+    private float speed = 800.0f; // Pixels per second
+    private float velX;
+    private float velY;
     private int playerWidth = 50;
     private int playerHeight = 100;
-    private Audio boing;
+    private Audio boingX;
+    private Audio boingY;
+    private Random random = new Random();
 
     public Atlas() {
-        super("Atlas Game", 1600, 900, 480);
+        super("Atlas Game", 1600, 900, 60);
     }
 
     @Override
     public void init() {
         // Resource loading should happen in init()
-        boing = new Audio("/audio/boing.ogg");
+        boingX = new Audio("/audio/boing.ogg");
+        boingY = new Audio("/audio/boing.ogg");
+
+        // Random start position near center
+        float centerX = CANVAS_WIDTH / 2.0f;
+        float centerY = CANVAS_HEIGHT / 2.0f;
+
+        // Randomize between (Center - 50) and (Center + 50)
+        x = (centerX - 50) + random.nextFloat() * 100;
+        y = (centerY - 50) + random.nextFloat() * 100;
+
+        prevX = x;
+        prevY = y;
+
+        // Choose a random direction (0 to 360 degrees) and calculate velocity vectors
+        double angle = random.nextDouble() * 2 * Math.PI; // 0 to 2PI radians
+        velX = (float) (Math.cos(angle) * speed);
+        velY = (float) (Math.sin(angle) * speed);
     }
 
     @Override
@@ -39,27 +60,29 @@ public class Atlas extends Game {
 
         // Convert deltaTime (nanoseconds) to seconds for physics calculation
         double deltaSeconds = deltaTime / 1_000_000_000.0;
-        float moveAmount = (float) (speed * deltaSeconds);
-
-        if (input.isKeyDown(KeyEvent.VK_W)) y -= moveAmount;
-        if (input.isKeyDown(KeyEvent.VK_S)) y += moveAmount;
-        if (input.isKeyDown(KeyEvent.VK_A)) x -= moveAmount;
-        if (input.isKeyDown(KeyEvent.VK_D)) x += moveAmount;
+        
+        // Apply velocity to position
+        x += velX * deltaSeconds;
+        y += velY * deltaSeconds;
 
         if (x < 0) {
             x = 0;
-            boing.play();
+            velX *= -1; // Bounce horizontally
+            boingX.play();
         } else if (x + playerWidth > CANVAS_WIDTH) {
             x = CANVAS_WIDTH - playerWidth;
-            boing.play();
+            velX *= -1; // Bounce horizontally
+            boingX.play();
         }
 
         if (y < 0) {
             y = 0;
-            boing.play();
+            velY *= -1; // Bounce vertically
+            boingY.play();
         } else if (y + playerHeight > CANVAS_HEIGHT) {
             y = CANVAS_HEIGHT - playerHeight;
-            boing.play();
+            velY *= -1; // Bounce vertically
+            boingY.play();
         }
     }
 
