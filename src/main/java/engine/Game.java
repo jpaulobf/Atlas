@@ -5,6 +5,9 @@ import window.GameWindow;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
 
@@ -25,6 +28,13 @@ public abstract class Game {
     protected Engine engine;
     protected KeyboardInputs input;
     private int currentFps = 0;
+    protected final int CANVAS_WIDTH = 1920;
+    protected final int CANVAS_HEIGHT = 1080;
+    
+    // Cached scaling values
+    private double scale = 1.0;
+    private double offsetX = 0;
+    private double offsetY = 0;
 
     /**
      * Constructs a new Game instance with the specified title, width, and height
@@ -42,6 +52,14 @@ public abstract class Game {
         // The Engine will call the update and render methods of this Game instance
         // during the game loop.
         engine = new Engine(this, targetFps);
+
+        // Recalculate scale only when window/canvas is resized
+        gameWindow.getCanvas().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                recalculateScale();
+            }
+        });
     }
 
     /**
@@ -50,7 +68,28 @@ public abstract class Game {
      */
     public void start() {
         init();
+        recalculateScale(); // Initial calculation
         engine.start();
+    }
+
+    /**
+     * Recalculates the scaling factor and offsets to center the game content
+     * maintaining the aspect ratio. This should be called on window resize.
+     */
+    private void recalculateScale() {
+        Canvas canvas = gameWindow.getCanvas();
+        if (canvas == null) return;
+
+        double scaleX = (double) canvas.getWidth() / CANVAS_WIDTH;
+        double scaleY = (double) canvas.getHeight() / CANVAS_HEIGHT;
+        
+        this.scale = Math.min(scaleX, scaleY);
+
+        double drawWidth = CANVAS_WIDTH * this.scale;
+        double drawHeight = CANVAS_HEIGHT * this.scale;
+
+        this.offsetX = (canvas.getWidth() - drawWidth) / 2;
+        this.offsetY = (canvas.getHeight() - drawHeight) / 2;
     }
 
     /**
@@ -108,9 +147,13 @@ public abstract class Game {
         // Clear the screen before rendering the new frame
         g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-        // Send the Graphics object and interpolation value to the subclass's onRender
-        // method
-        onRender(g, interpolation);
+        // Create a copy of the Graphics object to apply the transformation
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.translate(offsetX, offsetY);
+        g2d.scale(scale, scale);
+
+        onRender(g2d, interpolation);
+        g2d.dispose(); // Release the copy
 
         // Draw FPS counter in the top-left corner for debugging
         g.setColor(Color.BLACK);

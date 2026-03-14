@@ -6,7 +6,6 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 /**
  * The GameWindow class is responsible for creating and managing the main application window for the game.
@@ -18,7 +17,7 @@ public class GameWindow {
     private JFrame jFrame;
     private Canvas canvas;
     private ScreenState screenState = ScreenState.WINDOWED; // Default screen state
-    private ScreenState preferredFullscreenState = ScreenState.FULLSCREEN; // Default fullscreen target
+    private ScreenState preferredFullscreenState = ScreenState.BORDERLESS_FULLSCREEN; // Default fullscreen target
     private String title;
     private int width;
     private int height;

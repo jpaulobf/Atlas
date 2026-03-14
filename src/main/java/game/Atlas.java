@@ -46,23 +46,19 @@ public class Atlas extends Game {
         if (input.isKeyDown(KeyEvent.VK_A)) x -= moveAmount;
         if (input.isKeyDown(KeyEvent.VK_D)) x += moveAmount;
 
-        // Screen limits (Collision with borders)
-        int screenWidth = gameWindow.getCanvas().getWidth();
-        int screenHeight = gameWindow.getCanvas().getHeight();
-
         if (x < 0) {
             x = 0;
             boing.play();
-        } else if (x + playerWidth > screenWidth) {
-            x = screenWidth - playerWidth;
+        } else if (x + playerWidth > CANVAS_WIDTH) {
+            x = CANVAS_WIDTH - playerWidth;
             boing.play();
         }
 
         if (y < 0) {
             y = 0;
             boing.play();
-        } else if (y + playerHeight > screenHeight) {
-            y = screenHeight - playerHeight;
+        } else if (y + playerHeight > CANVAS_HEIGHT) {
+            y = CANVAS_HEIGHT - playerHeight;
             boing.play();
         }
     }
