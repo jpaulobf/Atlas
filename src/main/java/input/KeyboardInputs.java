@@ -1,6 +1,6 @@
 package input;
 
-import window.GameWindow;
+import window.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -9,10 +9,10 @@ import java.awt.event.KeyListener;
  */
 public class KeyboardInputs implements KeyListener {
 
-    private GameWindow gameWindow;
+    private Window gameWindow;
     private boolean[] keys = new boolean[1024];
 
-    public KeyboardInputs(GameWindow gameWindow) {
+    public KeyboardInputs(Window gameWindow) {
         this.gameWindow = gameWindow;
     }
 

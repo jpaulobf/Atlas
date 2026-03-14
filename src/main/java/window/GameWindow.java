@@ -3,6 +3,8 @@ package window;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -14,7 +16,7 @@ import engine.Game;
  * It uses Java Swing to create a JFrame and a Canvas where the game will be
  * rendered.
  */
-public class GameWindow {
+public class GameWindow implements Window {
 
     // --- Private fields for the JFrame and Canvas components
     private JFrame jFrame;
@@ -156,7 +158,12 @@ public class GameWindow {
         return jFrame;
     }
 
-    public engine.Game getGame() {
+    public Game getGame() {
         return game;
+    }
+
+    @Override
+    public Graphics2D getGraphics() {
+        return (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
     }
 }

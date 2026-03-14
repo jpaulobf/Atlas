@@ -20,7 +20,7 @@ public class Atlas extends Game {
     private int level = 1; // Difficulty level (1 to 10)
     private BufferedImage background; // The background cache
 
-    // Configurações visuais e lógicas das faixas
+    // Safe zones to ensure the player has space to react and to create a more balanced scenario
     private final int TOP_SAFE_ZONE = 100;
     private final int BOTTOM_SAFE_ZONE = 100;
     private final int MIDDLE_SAFE_ZONE = 120;

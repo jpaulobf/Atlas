@@ -1,6 +1,7 @@
 package engine;
 
 import input.KeyboardInputs;
+import window.Window;
 import window.GameWindow;
 import java.awt.Canvas;
 import java.awt.Color;
@@ -24,7 +25,7 @@ import java.awt.image.BufferStrategy;
 public abstract class Game {
 
     // Main game components
-    protected GameWindow gameWindow;
+    protected Window gameWindow;
     protected Engine engine;
     protected KeyboardInputs input;
     private int currentFps = 0;
@@ -45,7 +46,7 @@ public abstract class Game {
      * @param width
      * @param height
      */
-    public Game(String title, int width, int height, int targetFps) {
+   public Game(String title, int width, int height, int targetFps) {
         gameWindow = new GameWindow(title, width, height, this);
         input = new KeyboardInputs(gameWindow);
         gameWindow.addKeyListener(input);
@@ -77,7 +78,7 @@ public abstract class Game {
      * Recalculates the scaling factor and offsets to center the game content
      * maintaining the aspect ratio. This should be called on window resize.
      */
-    private void recalculateScale() {
+   private void recalculateScale() {
         Canvas canvas = gameWindow.getCanvas();
         if (canvas == null)
             return;
@@ -164,7 +165,7 @@ public abstract class Game {
         // Create a copy of the Graphics object to apply the transformation
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.translate(offsetX, offsetY);
-        g2d.scale(scale, scale);
+       g2d.scale(scale, scale);
 
         onRender(g2d, paused ? 0 : interpolation);
         if (paused) {
