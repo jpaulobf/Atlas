@@ -17,7 +17,7 @@ public class Atlas extends Game {
 
     private List<Entity> entities = new ArrayList<>();
     private Random random = new Random();
-    private int level = 2; // Nível de dificuldade (1 a 10)
+    private int level = 10; // Nível de dificuldade (1 a 10)
     private BufferedImage background; // O Cache do cenário
 
     // Configurações visuais e lógicas das faixas
@@ -45,7 +45,7 @@ public class Atlas extends Game {
 
         // São 8 faixas no total (4 em cima, 4 em baixo)
         int laneHeight = availableRoadHeight / 8;
-        int carSize = 70; // Um pouco menor que a faixa
+        int carSize = 60; // Um pouco menor que a faixa
         int carYOffset = (laneHeight - carSize) / 2; // Centralizar na faixa
 
         // Criar as faixas
@@ -180,13 +180,6 @@ public class Atlas extends Game {
         Color color;
         Audio audio;
 
-        // Variáveis de deformação
-        float scaleX = 1.0f;
-        float scaleY = 1.0f;
-        float squashCycleX = 0.0f;
-        float squashCycleY = 0.0f;
-        float squashSpeed = 15.0f;
-
         public Entity(float x, float y, int w, int h, float vx, float vy, Color c) {
             this.x = x;
             this.y = y;
@@ -243,14 +236,8 @@ public class Atlas extends Game {
             float interpX = (float) (prevX + (x - prevX) * interpolation);
             float interpY = (float) (prevY + (y - prevY) * interpolation);
 
-            float drawnWidth = width * scaleX;
-            float drawnHeight = height * scaleY;
-
-            float drawX = interpX + (width - drawnWidth) / 2.0f;
-            float drawY = interpY + (height - drawnHeight) / 2.0f;
-
             g.setColor(color);
-            g.fillRect((int) drawX, (int) drawY, (int) drawnWidth, (int) drawnHeight);
+            g.fillRect((int) interpX, (int) interpY, (int) width, (int) height);
         }
     }
 
@@ -264,14 +251,8 @@ public class Atlas extends Game {
             float interpX = (float) (prevX + (x - prevX) * interpolation);
             float interpY = (float) (prevY + (y - prevY) * interpolation);
 
-            float drawnWidth = width * scaleX;
-            float drawnHeight = height * scaleY;
-
-            float drawX = interpX + (width - drawnWidth) / 2.0f;
-            float drawY = interpY + (height - drawnHeight) / 2.0f;
-
             g.setColor(color);
-            g.fillOval((int) drawX, (int) drawY, (int) drawnWidth, (int) drawnHeight);
+            g.fillOval((int) interpX, (int) interpY, (int) width, (int) height);
         }
     }
 
