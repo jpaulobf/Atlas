@@ -5,7 +5,6 @@ import window.Window;
 import window.GameWindow;
 import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -29,8 +28,8 @@ public abstract class Game {
     protected Engine engine;
     protected KeyboardInputs input;
     private int currentFps = 0;
-    protected final int CANVAS_WIDTH = 1600;
-    protected final int CANVAS_HEIGHT = 900;
+    public static final int CANVAS_WIDTH = 1600;
+    public static final int CANVAS_HEIGHT = 900;
 
     // Cached scaling values
     private double scale = 1.0;
@@ -141,9 +140,9 @@ public abstract class Game {
             return;
         }
 
-        Graphics g;
+        Graphics2D g;
         try {
-            g = bs.getDrawGraphics();
+            g = (Graphics2D)bs.getDrawGraphics();
         } catch (Exception e) {
             // If the buffer strategy fails (common when toggling fullscreen),
             // recreate the strategy for the new window state if valid, and skip this frame.
@@ -188,7 +187,7 @@ public abstract class Game {
         java.awt.Toolkit.getDefaultToolkit().sync();
     }
 
-    private void drawPauseScreen(Graphics g) {
+    private void drawPauseScreen(Graphics2D g) {
         // Calculate the dimensions and position for the pause rectangle
         int rectWidth = 320;
         int rectHeight = 150;
@@ -211,5 +210,7 @@ public abstract class Game {
 
     public abstract void onUpdate(long deltaTime);
 
-    public abstract void onRender(Graphics g, double interpolation);
+    public abstract void onRender(Graphics2D g, double interpolation);
+
+    public abstract void toggleColisionBorders();
 }

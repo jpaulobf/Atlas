@@ -32,17 +32,21 @@ public class KeyboardInputs implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && e.isAltDown()) {
             gameWindow.toggleFullScreen();
         }
-
-        if (e.getKeyCode() == KeyEvent.VK_P) {
-            gameWindow.getGame().togglePause();
-        }
-    }
+   }
 
     @Override
     public void keyReleased(KeyEvent e) {
         // Update key state
         if (e.getKeyCode() >= 0 && e.getKeyCode() < keys.length) {
             keys[e.getKeyCode()] = false;
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_P) {
+            gameWindow.getGame().togglePause();
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_F10) {
+            gameWindow.getGame().toggleColisionBorders();
         }
     }
 
