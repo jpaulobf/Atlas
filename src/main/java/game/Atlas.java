@@ -19,7 +19,7 @@ public class Atlas extends Game {
     private final int offsetY = 20;
 
     public Atlas() {
-        super("Pacman", 1600, 900, 0);
+        super("Pacman", 1600, 900, 60);
         this.pacman = new Pacman(this, tileSize, offsetY);
     }
 
