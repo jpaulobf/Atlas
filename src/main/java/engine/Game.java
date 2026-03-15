@@ -173,7 +173,7 @@ public abstract class Game {
         g2d.dispose(); // Release the copy
 
         // Draw FPS counter in the top-left corner for debugging
-        g.setColor(Color.BLACK);
+        g.setColor(Color.YELLOW);
         g.drawString("FPS: " + currentFps, 5, 15);
 
         g.dispose();
@@ -212,5 +212,5 @@ public abstract class Game {
 
     public abstract void onRender(Graphics2D g, double interpolation);
 
-    public abstract void toggleColisionBorders();
+    public abstract void toggleCollisionBorders();
 }

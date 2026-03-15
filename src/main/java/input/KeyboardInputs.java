@@ -46,7 +46,7 @@ public class KeyboardInputs implements KeyListener {
         }
 
         if (e.getKeyCode() == KeyEvent.VK_F10) {
-            gameWindow.getGame().toggleColisionBorders();
+            gameWindow.getGame().toggleCollisionBorders();
         }
     }
 
