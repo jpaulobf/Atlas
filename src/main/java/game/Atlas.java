@@ -2,6 +2,8 @@ package game;
 
 import engine.Game;
 import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+
 import audio.Audio;
 import java.util.Random;
 
@@ -10,15 +12,15 @@ import java.util.Random;
  */
 public class Atlas extends Game {
 
-    protected Background background;
-    protected Pacman pacman;
+    Background background;
+    Pacman pacman;
     private final int tileSize = 24;
     private final int offsetX = (Game.CANVAS_WIDTH / 2) - (tileSize * 34 / 2);
     private final int offsetY = 20;
 
     public Atlas() {
         super("Pacman", 1600, 900, 0);
-        this.pacman = new Pacman(tileSize, offsetY);
+        this.pacman = new Pacman(this, tileSize, offsetY);
     }
 
     @Override
@@ -28,7 +30,19 @@ public class Atlas extends Game {
 
     @Override
     public void onUpdate(long deltaTime) {
-        System.out.println(this.background.colliding(pacman.getBorders()));
+        if (this.input.isKeyDown(java.awt.event.KeyEvent.VK_UP)) {
+            pacman.up(deltaTime);
+        } else if (this.input.isKeyDown(java.awt.event.KeyEvent.VK_DOWN)) {
+            pacman.down(deltaTime);
+        } 
+        
+        if (this.input.isKeyDown(java.awt.event.KeyEvent.VK_LEFT)) {
+            pacman.left(deltaTime);
+        } else if (this.input.isKeyDown(java.awt.event.KeyEvent.VK_RIGHT)) {
+            pacman.right(deltaTime);
+        }
+
+        pacman.update(deltaTime);
         
     }
 
@@ -46,5 +60,10 @@ public class Atlas extends Game {
 
     public static void main(String[] args) {
         new Atlas().start();
+    }
+
+    @Override
+    public boolean colliding(Rectangle2D borders) {
+        return this.background.colliding(borders);
     }
 }

@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 
 /**
@@ -213,4 +214,6 @@ public abstract class Game {
     public abstract void onRender(Graphics2D g, double interpolation);
 
     public abstract void toggleCollisionBorders();
+
+    public abstract boolean colliding(Rectangle2D borders);
 }
