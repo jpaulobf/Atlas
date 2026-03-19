@@ -15,7 +15,7 @@ public class Pacman {
     private Ellipse2D circle;
     private double x = 0;
     private double y = 0;
-    private int speed = 120; // pixels per second
+    private int speed = 160; // pixels per second
 
     private final int UP = 0;
     private final int DOWN = 1;
